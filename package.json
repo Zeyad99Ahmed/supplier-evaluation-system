@@ -1,0 +1,31 @@
+{
+  "name": "supplier-evaluation-system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Supplier Directory & Evaluation System - Group 26 (Cloud Computing & Cloud Security 26CSCN29H)",
+  "license": "UNLICENSED",
+  "scripts": {
+    "setup": "npm install && npm --prefix services install",
+    "local": "node scripts/local-up.js",
+    "local:reset": "node scripts/local-up.js --reset",
+    "db:setup": "node scripts/db-setup.js",
+    "seed:demo": "node scripts/seed-demo.js",
+    "test": "node tests/run-all.js",
+    "test:resilience": "node tests/resilience.test.js",
+    "test:lambda": "node scripts/package-lambda.js all && node tests/lambda-handler.test.js",
+    "test:all": "npm test && npm run test:resilience && npm run test:lambda",
+    "logs:query": "node scripts/log-query.js",
+    "screenshots": "node scripts/capture-screenshots.js",
+    "build:pages": "node scripts/build-pages.js",
+    "package:lambdas": "node scripts/package-lambda.js all",
+    "secret-scan": "node scripts/secret-scan.js",
+    "diagrams": "node scripts/render-diagrams.js",
+    "report": "node docs/report/build-report.js"
+  },
+  "devDependencies": {
+    "adm-zip": "^0.5.16",
+    "docx": "^9.5.0",
+    "embedded-postgres": "18.7.0-beta.19",
+    "puppeteer-core": "^23.10.0"
+  }
+}

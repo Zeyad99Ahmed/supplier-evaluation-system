@@ -1,0 +1,17 @@
+# dependencies
+node_modules/
+# secrets - never commit
+.env
+.env.*
+!.env.example
+!.env.floci.example
+infra/.env.floci
+*.pem
+# local runtime data, logs and build output
+.localdata/
+logs/
+dist/
+out/
+*.zip
+# generated per deployment (API Gateway URLs of this machine)
+infra/floci-urls.env
