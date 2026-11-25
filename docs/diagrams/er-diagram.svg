@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" font-family="Segoe UI, Arial, sans-serif" font-size="12.5">
+  <rect width="1500" height="900" fill="#fff"/>
+  <text x="750" y="32" text-anchor="middle" font-size="22" font-weight="700">Data model (ER diagram) - one schema per service</text>
+  <text x="750" y="54" text-anchor="middle" font-size="13" fill="#475569">Solid lines = foreign keys inside a schema. Dashed lines = cross-service references (UUID only), checked through the owning service's API.</text>
+
+  <!-- helper: entity boxes -->
+  <!-- AUTH -->
+  <rect x="30" y="80" width="300" height="340" rx="10" fill="#f5f3ff" stroke="#7c3aed"/>
+  <text x="45" y="102" font-weight="700" fill="#7c3aed">auth + audit (Auth Service - shared, Zeyad)</text>
+  <rect x="50" y="115" width="260" height="170" fill="#fff" stroke="#7c3aed"/><rect x="50" y="115" width="260" height="24" fill="#ede9fe" stroke="#7c3aed"/>
+  <text x="60" y="132" font-weight="700">users</text>
+  <text x="60" y="156">PK id uuid</text><text x="60" y="174">email (unique, case-insensitive)</text><text x="60" y="192">password_hash (scrypt)</text>
+  <text x="60" y="210">full_name, role (admin|staff)</text><text x="60" y="228">is_active, failed_attempts,</text><text x="60" y="246">locked_until, last_login_at</text><text x="60" y="264">created_by, created_at</text>
+  <rect x="50" y="300" width="260" height="64" fill="#fff" stroke="#7c3aed"/><rect x="50" y="300" width="260" height="24" fill="#ede9fe" stroke="#7c3aed"/>
+  <text x="60" y="317" font-weight="700">sessions</text><text x="60" y="341">PK id, FK user_id -> users</text><text x="60" y="357">expires_at, revoked_at</text>
+  <line x1="180" y1="285" x2="180" y2="300" stroke="#7c3aed" stroke-width="2"/><text x="186" y="296" font-size="11">1 : N</text>
+  <rect x="50" y="374" width="260" height="38" fill="#fff" stroke="#7c3aed"/>
+  <text x="60" y="390" font-weight="700">audit.activity_log</text><text x="60" y="406" font-size="11.5">event_type, service, user_id, path, status, ip, detail</text>
+
+  <!-- SUPPLIER -->
+  <rect x="360" y="80" width="400" height="560" rx="10" fill="#f0fdf4" stroke="#15803d"/>
+  <text x="375" y="102" font-weight="700" fill="#15803d">supplier schema (Supplier Service - Zeyad)</text>
+  <rect x="380" y="115" width="160" height="70" fill="#fff" stroke="#15803d"/><rect x="380" y="115" width="160" height="24" fill="#dcfce7" stroke="#15803d"/>
+  <text x="390" y="132" font-weight="700">categories</text><text x="390" y="156">PK id serial</text><text x="390" y="174">name (unique)</text>
+  <rect x="380" y="215" width="360" height="190" fill="#fff" stroke="#15803d"/><rect x="380" y="215" width="360" height="24" fill="#dcfce7" stroke="#15803d"/>
+  <text x="390" y="232" font-weight="700">suppliers</text>
+  <text x="390" y="256">PK id uuid · FK category_id -> categories</text><text x="390" y="274">name (unique), email, phone, address, country</text>
+  <text x="390" y="292">status ACTIVE | UNDER_REVIEW | SUSPENDED | ARCHIVED</text><text x="390" y="310">status_reason</text>
+  <text x="390" y="328">avg_score, rating_count, on_time_rate (snapshot</text><text x="390" y="346">pushed by Evaluation), score_updated_at</text><text x="390" y="364">created_by (-> auth.users), created_at, updated_at</text>
+  <line x1="460" y1="185" x2="460" y2="215" stroke="#15803d" stroke-width="2"/><text x="466" y="203" font-size="11">1 : N</text>
+  <rect x="380" y="430" width="170" height="110" fill="#fff" stroke="#15803d"/><rect x="380" y="430" width="170" height="24" fill="#dcfce7" stroke="#15803d"/>
+  <text x="390" y="447" font-weight="700">supplier_contacts</text><text x="390" y="471">PK id · FK supplier_id</text><text x="390" y="489">name, job_title</text><text x="390" y="507">email, phone</text>
+  <rect x="570" y="430" width="170" height="200" fill="#fff" stroke="#15803d"/><rect x="570" y="430" width="170" height="24" fill="#dcfce7" stroke="#15803d"/>
+  <text x="580" y="447" font-weight="700">contracts</text><text x="580" y="471">PK id · FK supplier_id</text><text x="580" y="489">title</text><text x="580" y="507">start_date &lt; end_date</text>
+  <text x="580" y="525">value &gt; 0, currency</text><text x="580" y="543">value_egp, rate_to_egp,</text><text x="580" y="561">rate_date</text><text x="580" y="579">status ACTIVE|TERMINATED</text><text x="580" y="597">rule: no overlap</text>
+  <rect x="380" y="560" width="170" height="70" fill="#fff" stroke="#15803d"/><rect x="380" y="560" width="170" height="24" fill="#dcfce7" stroke="#15803d"/>
+  <text x="390" y="577" font-weight="700">status_history</text><text x="390" y="601">FK supplier_id, from/to,</text><text x="390" y="619">reason, changed_by</text>
+  <line x1="465" y1="405" x2="465" y2="430" stroke="#15803d" stroke-width="2"/><text x="470" y="422" font-size="11">1 : N</text>
+  <line x1="655" y1="405" x2="655" y2="430" stroke="#15803d" stroke-width="2"/><text x="660" y="422" font-size="11">1 : N</text>
+  <path d="M380,380 L365,380 L365,595 L380,595" fill="none" stroke="#15803d" stroke-width="2"/><text x="330" y="490" font-size="11" fill="#15803d">1 : N</text>
+
+  <!-- ORDERS -->
+  <rect x="790" y="80" width="330" height="520" rx="10" fill="#fffbeb" stroke="#b45309"/>
+  <text x="805" y="102" font-weight="700" fill="#b45309">orders schema (Order Service - Ebraheem)</text>
+  <rect x="810" y="115" width="290" height="340" fill="#fff" stroke="#b45309"/><rect x="810" y="115" width="290" height="24" fill="#fef3c7" stroke="#b45309"/>
+  <text x="820" y="132" font-weight="700">purchase_orders</text>
+  <text x="820" y="156">PK id uuid · order_number (unique PO-n)</text><text x="820" y="174">supplier_id, supplier_name, category</text><text x="820" y="192">contract_id</text>
+  <text x="820" y="210">created_by, created_by_name</text><text x="820" y="228">description, quantity &gt; 0, unit_price &gt; 0</text><text x="820" y="246">amount, currency</text>
+  <text x="820" y="264">amount_egp, rate_to_egp, rate_date</text><text x="820" y="282">conversion_status NOT_NEEDED|CONVERTED|PENDING</text>
+  <text x="820" y="300">order_date, expected_date (&gt;= order_date)</text><text x="820" y="318">delivered_date, on_time, days_late</text>
+  <text x="820" y="336">status PENDING_APPROVAL | APPROVED |</text><text x="820" y="354">DELIVERED | CANCELLED | REJECTED</text><text x="820" y="372">approved_by, approval_note</text>
+  <rect x="810" y="480" width="290" height="90" fill="#fff" stroke="#b45309"/><rect x="810" y="480" width="290" height="24" fill="#fef3c7" stroke="#b45309"/>
+  <text x="820" y="497" font-weight="700">order_status_history</text><text x="820" y="521">FK order_id -> purchase_orders</text><text x="820" y="539">from_status, to_status, note</text><text x="820" y="557">changed_by, changed_at</text>
+  <line x1="955" y1="455" x2="955" y2="480" stroke="#b45309" stroke-width="2"/><text x="960" y="472" font-size="11">1 : N</text>
+
+  <!-- EVALUATION -->
+  <rect x="1150" y="80" width="320" height="560" rx="10" fill="#fef2f2" stroke="#b91c1c"/>
+  <text x="1165" y="102" font-weight="700" fill="#b91c1c">evaluation schema (Evaluation Service - Karim)</text>
+  <rect x="1170" y="115" width="280" height="250" fill="#fff" stroke="#b91c1c"/><rect x="1170" y="115" width="280" height="24" fill="#fee2e2" stroke="#b91c1c"/>
+  <text x="1180" y="132" font-weight="700">evaluations</text>
+  <text x="1180" y="156">PK id · order_id (UNIQUE: 1 per order)</text><text x="1180" y="174">order_number, supplier_id, supplier_name</text><text x="1180" y="192">rated_by, rated_by_name</text>
+  <text x="1180" y="210">quality, price, delivery (1-5)</text><text x="1180" y="228">overall = .4q + .3p + .3d</text><text x="1180" y="246">comment (&lt;= 500), on_time, amount_egp</text><text x="1180" y="264">created_at, updated_at (7-day edit)</text>
+  <rect x="1170" y="385" width="280" height="140" fill="#fff" stroke="#b91c1c"/><rect x="1170" y="385" width="280" height="24" fill="#fee2e2" stroke="#b91c1c"/>
+  <text x="1180" y="402" font-weight="700">price_conversions</text><text x="1180" y="426">PK id · source_type order|contract</text><text x="1180" y="444">source_id, supplier_id</text>
+  <text x="1180" y="462">currency, original_amount</text><text x="1180" y="480">rate_to_egp, amount_egp, rate_date</text><text x="1180" y="498">provider, stale, requested_by</text>
+  <rect x="1170" y="545" width="280" height="80" fill="#fff" stroke="#b91c1c"/><rect x="1170" y="545" width="280" height="24" fill="#fee2e2" stroke="#b91c1c"/>
+  <text x="1180" y="562" font-weight="700">rate_cache</text><text x="1180" y="586">PK base (EGP), rates jsonb</text><text x="1180" y="604">provider_date, fetched_at (6 h TTL)</text>
+
+  <!-- cross-service dashed refs -->
+  <g stroke="#475569" stroke-width="1.8" stroke-dasharray="7 4" fill="none">
+    <path d="M810,174 C770,174 770,300 740,300"/>
+    <path d="M810,192 C780,192 780,520 740,520"/>
+    <path d="M1170,156 C1140,156 1140,140 1100,140"/>
+    <path d="M1170,174 C1130,174 1100,690 700,690 L560,690 L560,405"/>
+    <path d="M1170,444 C1140,444 1140,560 740,560"/>
+    <path d="M810,210 C700,250 400,700 180,700 L180,285"/>
+  </g>
+  <g font-size="11" fill="#334155">
+    <text x="745" y="292">supplier_id</text><text x="745" y="512">contract_id</text><text x="1104" y="132">order_id</text>
+    <text x="760" y="704">evaluations.supplier_id -> suppliers</text><text x="745" y="552">source_id (contract / order)</text><text x="200" y="715">created_by / rated_by -> auth.users</text>
+  </g>
+
+  <!-- operations table -->
+  <rect x="30" y="740" width="1440" height="140" rx="10" fill="#f8fafc" stroke="#94a3b8"/>
+  <text x="45" y="764" font-weight="700" font-size="14">Operations per service (C = create, R = read, U = update, D = delete, Q = search / filter / aggregate)</text>
+  <text x="45" y="790">Auth: users C R U Q (no D: disable instead) · sessions C R U (logout = revoke) · activity_log C (all services, insert-only) R Q (admin monitoring)</text>
+  <text x="45" y="812">Supplier: categories C R · suppliers C R U Q (archive = soft delete) · contacts C R D · contracts C R U (overlap check) · status_history C R</text>
+  <text x="45" y="834">Order: purchase_orders C R U Q (filters, spending aggregates, contract usage SUM; no D: cancel) · order_status_history C R</text>
+  <text x="45" y="856">Evaluation: evaluations C R U D Q (author only; averages, trend, compare) · price_conversions C R Q (spend per supplier) · rate_cache C R U</text>
+</svg>
