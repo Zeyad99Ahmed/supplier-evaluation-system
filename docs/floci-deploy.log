@@ -1,0 +1,153 @@
+
+[1;36m==> Starting Postgres container (docker compose)[0m
+ Container floci Running 
+ Container ses-postgres Running 
+
+[1;36m==> Database: roles, schemas, grants, first admin (localhost:5432)[0m
+role auth_svc: created
+role supplier_svc: created
+role order_svc: created
+role evaluation_svc: created
+applied database/01_schemas.sql
+applied database/02_roles_grants.sql
+applied database/03_seed.sql
+first admin created: admin@ses.local
+Database setup complete.
+
+[1;36m==> Deploying auth-service to floci (account 000000000000, us-east-1)[0m
+secret ses/auth-service created
+role ses-auth-service-role created
+policy ses-auth-service-least-privilege attached to ses-auth-service-role
+built dist/auth-service.zip (3.8 MB) handler=auth-service/lambda.handler
+function ses-auth-service created (nodejs22.x)
+API ses-auth-service-api created: e18434178d
+route GET /api/health
+route POST /api/auth/login
+route POST /api/auth/logout
+route GET /api/auth/me
+route GET /api/users
+route POST /api/users
+route PATCH /api/users/{id}/status
+route GET /api/admin/activity
+API for auth-service: http://e18434178d.execute-api.localhost.floci.io:4566
+
+[1;36m==> Deploying supplier-service to floci (account 000000000000, us-east-1)[0m
+secret ses/supplier-service created
+role ses-supplier-service-role created
+policy ses-supplier-service-least-privilege attached to ses-supplier-service-role
+built dist/supplier-service.zip (3.8 MB) handler=supplier-service/lambda.handler
+function ses-supplier-service created (nodejs22.x)
+API ses-supplier-service-api created: 4188c125c1
+route GET /api/health
+route GET /api/categories
+route POST /api/categories
+route GET /api/suppliers
+route POST /api/suppliers
+route GET /api/suppliers/recommendations
+route GET /api/suppliers/{id}
+route PUT /api/suppliers/{id}
+route DELETE /api/suppliers/{id}
+route PATCH /api/suppliers/{id}/status
+route POST /api/suppliers/{id}/contacts
+route DELETE /api/suppliers/{id}/contacts/{contactId}
+route POST /api/suppliers/{id}/contracts
+route PATCH /api/contracts/{contractId}
+API for supplier-service: http://4188c125c1.execute-api.localhost.floci.io:4566
+
+[1;36m==> Deploying order-service to floci (account 000000000000, us-east-1)[0m
+secret ses/order-service created
+role ses-order-service-role created
+policy ses-order-service-least-privilege attached to ses-order-service-role
+built dist/order-service.zip (3.8 MB) handler=order-service/lambda.handler
+function ses-order-service created (nodejs22.x)
+API ses-order-service-api created: 4b54e4b6c0
+route GET /api/health
+route GET /api/orders
+route POST /api/orders
+route GET /api/orders/summary
+route GET /api/orders/{id}
+route PATCH /api/orders/{id}/status
+route PATCH /api/orders/{id}/approval
+route POST /api/orders/{id}/convert
+API for order-service: http://4b54e4b6c0.execute-api.localhost.floci.io:4566
+
+[1;36m==> Deploying evaluation-service to floci (account 000000000000, us-east-1)[0m
+secret ses/evaluation-service created
+role ses-evaluation-service-role created
+policy ses-evaluation-service-least-privilege attached to ses-evaluation-service-role
+built dist/evaluation-service.zip (3.8 MB) handler=evaluation-service/lambda.handler
+function ses-evaluation-service created (nodejs22.x)
+API ses-evaluation-service-api created: 63981333ab
+route GET /api/health
+route GET /api/evaluations
+route POST /api/evaluations
+route GET /api/evaluations/orders/{orderId}
+route PUT /api/evaluations/{id}
+route DELETE /api/evaluations/{id}
+route GET /api/performance/compare
+route GET /api/performance/suppliers/{id}
+route POST /api/performance/suppliers/{id}/sync
+route GET /api/rates/convert
+route GET /api/rates/{currency}
+API for evaluation-service: http://63981333ab.execute-api.localhost.floci.io:4566
+log group /aws/lambda/ses-auth-service: retention 14 days, filters forbidden-403, unauthenticated-401, server-errors-5xx
+log group /aws/lambda/ses-supplier-service: retention 14 days, filters forbidden-403, unauthenticated-401, server-errors-5xx
+log group /aws/lambda/ses-order-service: retention 14 days, filters forbidden-403, unauthenticated-401, server-errors-5xx
+log group /aws/lambda/ses-evaluation-service: retention 14 days, filters forbidden-403, unauthenticated-401, server-errors-5xx
+filters failed-logins (auth) and exchange-api-failures (evaluation) created
+alarms ses-repeated-failed-logins, ses-many-403, ses-server-errors created
+
+Useful queries (evidence for the report):
+  aws logs filter-log-events --log-group-name /aws/lambda/ses-auth-service --filter-pattern '{ $.event = "AUTH_LOGIN_FAILED" }' --query 'events[].message'
+  aws logs filter-log-events --log-group-name /aws/lambda/ses-order-service --filter-pattern '{ $.status = 403 }' --query 'events[].message'
+  aws cloudwatch get-metric-statistics --namespace SES/Security --metric-name FailedLogins --statistics Sum --period 300 \
+      --start-time $(date -u -d '-1 hour' +%FT%TZ) --end-time $(date -u +%FT%TZ)
+  aws cloudwatch describe-alarms --alarm-names ses-repeated-failed-logins --query 'MetricAlarms[].[AlarmName,StateValue]'
+make_bucket: ses-web
+Completed 2.6 KiB/~10.2 KiB (124.9 KiB/s) with ~4 file(s) remaining (calculating...)upload: dist\web\admin.html to s3://ses-web/admin.html                              
+Completed 2.6 KiB/~10.2 KiB (124.9 KiB/s) with ~3 file(s) remaining (calculating...)Completed 4.4 KiB/~10.2 KiB (209.5 KiB/s) with ~3 file(s) remaining (calculating...)upload: dist\web\dashboard.html to s3://ses-web/dashboard.html                      
+Completed 4.4 KiB/~10.2 KiB (209.5 KiB/s) with ~2 file(s) remaining (calculating...)Completed 8.7 KiB/~10.2 KiB (372.5 KiB/s) with ~2 file(s) remaining (calculating...)upload: dist\web\evaluations.html to s3://ses-web/evaluations.html                  
+Completed 8.7 KiB/~10.2 KiB (372.5 KiB/s) with ~1 file(s) remaining (calculating...)Completed 10.2 KiB/~10.2 KiB (378.4 KiB/s) with ~1 file(s) remaining (calculating...)upload: dist\web\index.html to s3://ses-web/index.html                               
+Completed 10.2 KiB/~10.2 KiB (378.4 KiB/s) with ~0 file(s) remaining (calculating...)Completed 14.3 KiB/23.4 KiB (322.2 KiB/s) with 3 file(s) remaining                   upload: dist\web\orders.html to s3://ses-web/orders.html                             
+Completed 14.3 KiB/23.4 KiB (322.2 KiB/s) with 2 file(s) remainingCompleted 19.0 KiB/23.4 KiB (401.6 KiB/s) with 2 file(s) remainingupload: dist\web\supplier.html to s3://ses-web/supplier.html      
+Completed 19.0 KiB/23.4 KiB (401.6 KiB/s) with 1 file(s) remainingCompleted 23.4 KiB/23.4 KiB (489.6 KiB/s) with 1 file(s) remainingupload: dist\web\suppliers.html to s3://ses-web/suppliers.html    
+Completed 7.7 KiB/7.7 KiB (428.0 KiB/s) with 1 file(s) remainingupload: dist\web\css\style.css to s3://ses-web/css/style.css    
+Completed 3.8 KiB/~11.7 KiB (161.6 KiB/s) with ~5 file(s) remaining (calculating...)upload: dist\web\js\admin.js to s3://ses-web/js/admin.js                            
+Completed 3.8 KiB/~11.7 KiB (161.6 KiB/s) with ~4 file(s) remaining (calculating...)Completed 6.1 KiB/~11.7 KiB (252.2 KiB/s) with ~4 file(s) remaining (calculating...)upload: dist\web\js\api.js to s3://ses-web/js/api.js                                
+Completed 6.1 KiB/~11.7 KiB (252.2 KiB/s) with ~3 file(s) remaining (calculating...)Completed 8.6 KiB/~19.7 KiB (294.3 KiB/s) with ~4 file(s) remaining (calculating...)upload: dist\web\js\auth.js to s3://ses-web/js/auth.js                              
+Completed 8.6 KiB/~19.7 KiB (294.3 KiB/s) with ~3 file(s) remaining (calculating...)Completed 9.0 KiB/~19.7 KiB (304.1 KiB/s) with ~3 file(s) remaining (calculating...)upload: dist\web\js\config.js to s3://ses-web/js/config.js                          
+Completed 9.0 KiB/~19.7 KiB (304.1 KiB/s) with ~2 file(s) remaining (calculating...)Completed 11.7 KiB/~21.5 KiB (346.1 KiB/s) with ~3 file(s) remaining (calculating...)upload: dist\web\js\dashboard.js to s3://ses-web/js/dashboard.js                     
+Completed 11.7 KiB/~21.5 KiB (346.1 KiB/s) with ~2 file(s) remaining (calculating...)Completed 19.7 KiB/~32.2 KiB (566.0 KiB/s) with ~3 file(s) remaining (calculating...)upload: dist\web\js\evaluations.js to s3://ses-web/js/evaluations.js                 
+Completed 19.7 KiB/~32.2 KiB (566.0 KiB/s) with ~2 file(s) remaining (calculating...)Completed 21.5 KiB/~32.2 KiB (561.9 KiB/s) with ~2 file(s) remaining (calculating...)upload: dist\web\js\login.js to s3://ses-web/js/login.js                             
+Completed 21.5 KiB/~32.2 KiB (561.9 KiB/s) with ~1 file(s) remaining (calculating...)Completed 32.2 KiB/~44.2 KiB (728.3 KiB/s) with ~3 file(s) remaining (calculating...)upload: dist\web\js\orders.js to s3://ses-web/js/orders.js                           
+Completed 32.2 KiB/~44.2 KiB (728.3 KiB/s) with ~2 file(s) remaining (calculating...)Completed 39.7 KiB/~48.8 KiB (870.7 KiB/s) with ~3 file(s) remaining (calculating...)upload: dist\web\js\supplier.js to s3://ses-web/js/supplier.js                       
+Completed 39.7 KiB/~48.8 KiB (870.7 KiB/s) with ~2 file(s) remaining (calculating...)Completed 44.2 KiB/48.8 KiB (917.9 KiB/s) with 2 file(s) remaining                   upload: dist\web\js\suppliers.js to s3://ses-web/js/suppliers.js                     
+Completed 44.2 KiB/48.8 KiB (917.9 KiB/s) with 1 file(s) remainingCompleted 48.8 KiB/48.8 KiB (971.6 KiB/s) with 1 file(s) remainingupload: dist\web\js\ui.js to s3://ses-web/js/ui.js                
+2026-11-22 02:44:12       2630 admin.html
+2026-11-22 02:44:14       7910 css/style.css
+2026-11-22 02:44:12       1896 dashboard.html
+2026-11-22 02:44:12       4381 evaluations.html
+2026-11-22 02:44:12       1562 index.html
+2026-11-22 02:44:15       3936 js/admin.js
+2026-11-22 02:44:15       2351 js/api.js
+2026-11-22 02:44:15       2544 js/auth.js
+2026-11-22 02:44:15        428 js/config.js
+2026-11-22 02:44:15       2720 js/dashboard.js
+2026-11-22 02:44:15       8166 js/evaluations.js
+2026-11-22 02:44:15       1829 js/login.js
+2026-11-22 02:44:15      10961 js/orders.js
+2026-11-22 02:44:15       7720 js/supplier.js
+2026-11-22 02:44:15       4571 js/suppliers.js
+2026-11-22 02:44:15       4794 js/ui.js
+2026-11-22 02:44:12       4145 orders.html
+2026-11-22 02:44:12       4812 supplier.html
+2026-11-22 02:44:12       4514 suppliers.html
+Website: http://localhost:4566/ses-web/index.html
+
+[1;36m==> Done. URLs:[0m
+AUTH_API=http://e18434178d.execute-api.localhost.floci.io:4566
+SUPPLIER_API=http://4188c125c1.execute-api.localhost.floci.io:4566
+ORDER_API=http://4b54e4b6c0.execute-api.localhost.floci.io:4566
+EVALUATION_API=http://63981333ab.execute-api.localhost.floci.io:4566
+SITE_URL=http://localhost:4566/ses-web/index.html
+Smoke test: bash infra/check-deploy.sh

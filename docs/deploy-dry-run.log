@@ -1,0 +1,158 @@
+# Deployment dry run: bash infra/deploy.sh <service> | monitoring | web, run against an AWS API mock (moto 5, account 000000000000 = Floci account) on 2026-11-21.
+# Lambda invocation itself is not emulated by this mock; it was tested separately (evidence/lambda-results.md).
+==> Deploying auth-service to floci (account 000000000000, us-east-1)
+secret ses/auth-service updated (new version)
+role ses-auth-service-role created
+policy ses-auth-service-least-privilege attached to ses-auth-service-role
+built dist/auth-service.zip (3.8 MB) handler=auth-service/lambda.handler
+function ses-auth-service created (nodejs22.x)
+API ses-auth-service-api created: wtqryopp
+route GET /api/health
+route POST /api/auth/login
+route POST /api/auth/logout
+route GET /api/auth/me
+route GET /api/users
+route POST /api/users
+route PATCH /api/users/{id}/status
+route GET /api/admin/activity
+API for auth-service: http://wtqryopp.execute-api.localhost.floci.io:4566
+==> Done. URLs:
+AUTH_API=http://wtqryopp.execute-api.localhost.floci.io:4566
+SITE_URL=http://localhost:4566/ses-web/index.html
+Smoke test: bash infra/check-deploy.sh
+==> Deploying supplier-service to floci (account 000000000000, us-east-1)
+secret ses/supplier-service updated (new version)
+role ses-supplier-service-role created
+policy ses-supplier-service-least-privilege attached to ses-supplier-service-role
+built dist/supplier-service.zip (3.8 MB) handler=supplier-service/lambda.handler
+function ses-supplier-service created (nodejs22.x)
+API ses-supplier-service-api created: djmqyspa
+route GET /api/health
+route GET /api/categories
+route POST /api/categories
+route GET /api/suppliers
+route POST /api/suppliers
+route GET /api/suppliers/recommendations
+route GET /api/suppliers/{id}
+route PUT /api/suppliers/{id}
+route DELETE /api/suppliers/{id}
+route PATCH /api/suppliers/{id}/status
+route POST /api/suppliers/{id}/contacts
+route DELETE /api/suppliers/{id}/contacts/{contactId}
+route POST /api/suppliers/{id}/contracts
+route PATCH /api/contracts/{contractId}
+API for supplier-service: http://djmqyspa.execute-api.localhost.floci.io:4566
+==> Deploying order-service to floci (account 000000000000, us-east-1)
+secret ses/order-service updated (new version)
+role ses-order-service-role created
+policy ses-order-service-least-privilege attached to ses-order-service-role
+built dist/order-service.zip (3.8 MB) handler=order-service/lambda.handler
+function ses-order-service created (nodejs22.x)
+API ses-order-service-api created: mzcjjbrh
+route GET /api/health
+route GET /api/orders
+route POST /api/orders
+route GET /api/orders/summary
+route GET /api/orders/{id}
+route PATCH /api/orders/{id}/status
+route PATCH /api/orders/{id}/approval
+route POST /api/orders/{id}/convert
+API for order-service: http://mzcjjbrh.execute-api.localhost.floci.io:4566
+==> Done. URLs:
+AUTH_API=http://wtqryopp.execute-api.localhost.floci.io:4566
+SUPPLIER_API=http://djmqyspa.execute-api.localhost.floci.io:4566
+ORDER_API=http://mzcjjbrh.execute-api.localhost.floci.io:4566
+SITE_URL=http://localhost:4566/ses-web/index.html
+Smoke test: bash infra/check-deploy.sh
+==> Deploying evaluation-service to floci (account 000000000000, us-east-1)
+secret ses/evaluation-service updated (new version)
+role ses-evaluation-service-role created
+policy ses-evaluation-service-least-privilege attached to ses-evaluation-service-role
+built dist/evaluation-service.zip (3.8 MB) handler=evaluation-service/lambda.handler
+function ses-evaluation-service created (nodejs22.x)
+API ses-evaluation-service-api created: lfmifbwy
+route GET /api/health
+route GET /api/evaluations
+route POST /api/evaluations
+route GET /api/evaluations/orders/{orderId}
+route PUT /api/evaluations/{id}
+route DELETE /api/evaluations/{id}
+route GET /api/performance/compare
+route GET /api/performance/suppliers/{id}
+route POST /api/performance/suppliers/{id}/sync
+route GET /api/rates/convert
+route GET /api/rates/{currency}
+API for evaluation-service: http://lfmifbwy.execute-api.localhost.floci.io:4566
+==> Done. URLs:
+AUTH_API=http://wtqryopp.execute-api.localhost.floci.io:4566
+SUPPLIER_API=http://djmqyspa.execute-api.localhost.floci.io:4566
+ORDER_API=http://mzcjjbrh.execute-api.localhost.floci.io:4566
+EVALUATION_API=http://lfmifbwy.execute-api.localhost.floci.io:4566
+SITE_URL=http://localhost:4566/ses-web/index.html
+Smoke test: bash infra/check-deploy.sh
+log group /aws/lambda/ses-auth-service: retention 14 days, filters forbidden-403, unauthenticated-401, server-errors-5xx
+log group /aws/lambda/ses-supplier-service: retention 14 days, filters forbidden-403, unauthenticated-401, server-errors-5xx
+log group /aws/lambda/ses-order-service: retention 14 days, filters forbidden-403, unauthenticated-401, server-errors-5xx
+log group /aws/lambda/ses-evaluation-service: retention 14 days, filters forbidden-403, unauthenticated-401, server-errors-5xx
+filters failed-logins (auth) and exchange-api-failures (evaluation) created
+alarms ses-repeated-failed-logins, ses-many-403, ses-server-errors created
+Useful queries (evidence for the report):
+  aws logs filter-log-events --log-group-name /aws/lambda/ses-auth-service --filter-pattern '{ $.event = "AUTH_LOGIN_FAILED" }' --query 'events[].message'
+  aws logs filter-log-events --log-group-name /aws/lambda/ses-order-service --filter-pattern '{ $.status = 403 }' --query 'events[].message'
+  aws cloudwatch get-metric-statistics --namespace SES/Security --metric-name FailedLogins --statistics Sum --period 300 \
+      --start-time $(date -u -d '-1 hour' +%FT%TZ) --end-time $(date -u +%FT%TZ)
+  aws cloudwatch describe-alarms --alarm-names ses-repeated-failed-logins --query 'MetricAlarms[].[AlarmName,StateValue]'
+==> Done. URLs:
+AUTH_API=http://wtqryopp.execute-api.localhost.floci.io:4566
+SUPPLIER_API=http://djmqyspa.execute-api.localhost.floci.io:4566
+ORDER_API=http://mzcjjbrh.execute-api.localhost.floci.io:4566
+EVALUATION_API=http://lfmifbwy.execute-api.localhost.floci.io:4566
+SITE_URL=http://localhost:4566/ses-web/index.html
+Smoke test: bash infra/check-deploy.sh
+make_bucket: ses-web
+upload: dist\web\admin.html to s3://ses-web/admin.html         
+upload: dist\web\dashboard.html to s3://ses-web/dashboard.html 
+upload: dist\web\evaluations.html to s3://ses-web/evaluations.html
+upload: dist\web\index.html to s3://ses-web/index.html          
+upload: dist\web\suppliers.html to s3://ses-web/suppliers.html  
+upload: dist\web\orders.html to s3://ses-web/orders.html        
+upload: dist\web\supplier.html to s3://ses-web/supplier.html    
+upload: dist\web\css\style.css to s3://ses-web/css/style.css  
+upload: dist\web\js\auth.js to s3://ses-web/js/auth.js          
+upload: dist\web\js\api.js to s3://ses-web/js/api.js            
+upload: dist\web\js\dashboard.js to s3://ses-web/js/dashboard.js
+upload: dist\web\js\admin.js to s3://ses-web/js/admin.js        
+upload: dist\web\js\config.js to s3://ses-web/js/config.js      
+upload: dist\web\js\orders.js to s3://ses-web/js/orders.js      
+upload: dist\web\js\suppliers.js to s3://ses-web/js/suppliers.js 
+upload: dist\web\js\login.js to s3://ses-web/js/login.js         
+upload: dist\web\js\supplier.js to s3://ses-web/js/supplier.js   
+upload: dist\web\js\evaluations.js to s3://ses-web/js/evaluations.js
+upload: dist\web\js\ui.js to s3://ses-web/js/ui.js               
+2026-11-22 01:20:05       2630 admin.html
+2026-11-22 01:20:11       7910 css/style.css
+2026-11-22 01:20:05       1896 dashboard.html
+2026-11-22 01:20:05       4381 evaluations.html
+2026-11-22 01:20:05       1562 index.html
+2026-11-22 01:20:17       3936 js/admin.js
+2026-11-22 01:20:17       2351 js/api.js
+2026-11-22 01:20:17       2544 js/auth.js
+2026-11-22 01:20:18        420 js/config.js
+2026-11-22 01:20:17       2720 js/dashboard.js
+2026-11-22 01:20:18       8166 js/evaluations.js
+2026-11-22 01:20:18       1829 js/login.js
+2026-11-22 01:20:18      10961 js/orders.js
+2026-11-22 01:20:18       7720 js/supplier.js
+2026-11-22 01:20:18       4571 js/suppliers.js
+2026-11-22 01:20:20       4794 js/ui.js
+2026-11-22 01:20:05       4145 orders.html
+2026-11-22 01:20:05       4812 supplier.html
+2026-11-22 01:20:05       4514 suppliers.html
+Website: http://localhost:4566/ses-web/index.html
+==> Done. URLs:
+AUTH_API=http://wtqryopp.execute-api.localhost.floci.io:4566
+SUPPLIER_API=http://djmqyspa.execute-api.localhost.floci.io:4566
+ORDER_API=http://mzcjjbrh.execute-api.localhost.floci.io:4566
+EVALUATION_API=http://lfmifbwy.execute-api.localhost.floci.io:4566
+SITE_URL=http://localhost:4566/ses-web/index.html
+Smoke test: bash infra/check-deploy.sh
