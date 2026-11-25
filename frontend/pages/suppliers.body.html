@@ -1,0 +1,54 @@
+    <div class="page-head"><div><h1>Suppliers</h1><p class="muted">Search the directory, find the best supplier for a category, and (Admin) register new suppliers.</p></div><span class="owner-tag">Supplier Service · Zeyad</span></div>
+    <section class="card">
+      <form id="filter-form" class="filters">
+        <label>Search <input name="search" maxlength="60" placeholder="Name or e-mail"></label>
+        <label>Category <select name="categoryId" id="f-category"><option value="">All categories</option></select></label>
+        <label>Status <select name="status"><option value="">All (not archived)</option><option>ACTIVE</option><option value="UNDER_REVIEW">UNDER REVIEW</option><option>SUSPENDED</option><option>ARCHIVED</option></select></label>
+        <label>Min. score <input name="minScore" type="number" min="0" max="5" step="0.5"></label>
+        <label>Sort <select name="sort"><option value="name">Name</option><option value="score">Best score</option><option value="newest">Newest</option></select></label>
+        <div class="actions"><button type="submit">Search</button><button type="reset" class="secondary">Clear</button></div>
+      </form>
+      <div id="filter-error" class="error-box" hidden></div>
+      <div id="supplier-list"></div>
+      <div class="actions" id="pager"></div>
+    </section>
+    <div class="grid grid-2">
+      <section class="card">
+        <h2>Recommend a supplier</h2>
+        <p class="muted small">Eligible suppliers (active, with a current contract) ranked by evaluation score and on-time rate.</p>
+        <form id="rec-form" class="filters">
+          <label>Category <select name="categoryId" id="rec-category" required></select></label>
+          <div class="actions"><button type="submit">Recommend</button></div>
+        </form>
+        <div id="rec-error" class="error-box" hidden></div>
+        <div id="rec-list"></div>
+      </section>
+      <section class="card admin-only">
+        <h2>Register a supplier</h2>
+        <form id="create-form" novalidate>
+          <div class="row">
+            <label>Name * <input name="name" required maxlength="120"></label>
+            <label>Category * <select name="categoryId" id="c-category" required></select></label>
+          </div>
+          <div class="row">
+            <label>E-mail * <input name="email" type="email" required maxlength="120"></label>
+            <label>Phone <input name="phone" maxlength="20" placeholder="+20 2 1234 5678"></label>
+          </div>
+          <div class="row">
+            <label>Address <input name="address" maxlength="200"></label>
+            <label>Country <input name="country" maxlength="60"></label>
+          </div>
+          <h3>First contact (optional)</h3>
+          <div class="row">
+            <label>Contact name <input name="contactName" maxlength="100"></label>
+            <label>Job title <input name="contactJobTitle" maxlength="80"></label>
+            <label>Contact e-mail <input name="contactEmail" type="email" maxlength="120"></label>
+          </div>
+          <div id="create-error" class="error-box" hidden></div>
+          <button type="submit">Create supplier</button>
+        </form>
+        <h3>Add a category</h3>
+        <form id="cat-form" class="filters"><label>Name <input name="name" maxlength="60" required></label><div class="actions"><button type="submit" class="secondary">Add category</button></div></form>
+        <div id="cat-error" class="error-box" hidden></div>
+      </section>
+    </div>
