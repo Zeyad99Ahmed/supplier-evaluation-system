@@ -1,0 +1,51 @@
+    <div class="page-head"><div><h1>Supplier evaluations</h1><p class="muted">Rate delivered orders, follow supplier performance and compare suppliers in one currency.</p></div><span class="owner-tag">Evaluation Service · Karim</span></div>
+    <div class="grid grid-2">
+      <section class="card staff-only">
+        <h2 id="rate-title">Rate a delivered order</h2>
+        <form id="rate-form" novalidate>
+          <label>Order * <select name="orderId" id="r-order" required><option value="">Choose one of your delivered orders…</option></select></label>
+          <div class="row">
+            <label>Quality (1-5) * <select name="quality" class="score-select"></select></label>
+            <label>Price (1-5) * <select name="price" class="score-select"></select></label>
+            <label>Delivery (1-5) * <select name="delivery" class="score-select"></select></label>
+          </div>
+          <label>Comment <textarea name="comment" maxlength="500" placeholder="What went well or badly?"></textarea></label>
+          <p class="muted small">Overall score = 0.4 × quality + 0.3 × price + 0.3 × delivery. One rating per order; you can edit or delete it for 7 days.</p>
+          <div id="rate-error" class="error-box" hidden></div>
+          <div class="actions"><button type="submit" id="rate-btn">Submit rating</button><button type="button" class="secondary" id="cancel-edit" hidden>Cancel edit</button></div>
+        </form>
+      </section>
+      <section class="card admin-only">
+        <h2>Ratings are submitted by Staff</h2>
+        <p class="muted">Admins can read every rating and report, and can re-sync a supplier's score, but cannot rate on behalf of Staff (the backend answers 403).</p>
+      </section>
+      <section class="card">
+        <h2>Currency converter <span class="owner-tag">ExchangeRate API</span></h2>
+        <form id="conv-form" class="filters">
+          <label>Amount <input name="amount" type="number" min="0.01" step="0.01" required></label>
+          <label>Currency <select name="currency" class="currency-select"></select></label>
+          <div class="actions"><button type="submit">Convert to EGP</button></div>
+        </form>
+        <div id="conv-error" class="error-box" hidden></div>
+        <p id="conv-result" class="muted"></p>
+      </section>
+    </div>
+    <section class="card">
+      <h2>Compare suppliers</h2>
+      <form id="compare-form" class="filters">
+        <label>Suppliers (2-5, hold Ctrl) <select name="supplierIds" id="cmp-suppliers" multiple size="5"></select></label>
+        <div class="actions"><button type="submit">Compare</button></div>
+      </form>
+      <div id="compare-error" class="error-box" hidden></div>
+      <div id="compare-result"></div>
+    </section>
+    <section class="card">
+      <h2>Rating history</h2>
+      <form id="filter-form" class="filters">
+        <label>Supplier <select name="supplierId" id="f-supplier"><option value="">All suppliers</option></select></label>
+        <label>Min. overall <input name="minOverall" type="number" min="1" max="5" step="0.5"></label>
+        <label>Show <select name="mine"><option value="">Everyone's ratings</option><option value="true">Only mine</option></select></label>
+        <div class="actions"><button type="submit">Filter</button></div>
+      </form>
+      <div id="history"></div>
+    </section>
