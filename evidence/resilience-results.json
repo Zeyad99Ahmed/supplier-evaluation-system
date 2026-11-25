@@ -1,0 +1,67 @@
+{
+  "runAt": "2026-11-22T00:59:30.782Z",
+  "passed": 6,
+  "failed": 0,
+  "results": [
+    {
+      "id": "RS-01",
+      "owner": "Karim (Evaluation)",
+      "category": "External API",
+      "scenario": "ExchangeRate provider unreachable, recent cached rate exists",
+      "expected": "200 with stale=true (cached rate used)",
+      "actual": "200",
+      "pass": true,
+      "evidence": "HTTP 200 {\"currency\":\"EUR\",\"rateToEgp\":59.07372401,\"rateDate\":\"2026-11-20\",\"stale\":true,\"provider\":\"exchangerate-api.com (open access)\"}"
+    },
+    {
+      "id": "RS-02",
+      "owner": "Karim (Evaluation)",
+      "category": "External API",
+      "scenario": "Provider returns an invalid response (result=error)",
+      "expected": "response rejected, cached rate used (stale=true)",
+      "actual": "200",
+      "pass": true,
+      "evidence": "HTTP 200 {\"currency\":\"USD\",\"rateToEgp\":53.80393845,\"rateDate\":\"2026-11-20\",\"stale\":true,\"provider\":\"exchangerate-api.com (open access)\"}"
+    },
+    {
+      "id": "RS-03",
+      "owner": "Karim (Evaluation)",
+      "category": "External API",
+      "scenario": "Provider down and cached rate older than 7 days",
+      "expected": "502 RATE_UNAVAILABLE",
+      "actual": "502 RATE_UNAVAILABLE",
+      "pass": true,
+      "evidence": "HTTP 502 {\"error\":{\"code\":\"RATE_UNAVAILABLE\",\"message\":\"Exchange rates are unavailable right now. Please try again later.\"}}"
+    },
+    {
+      "id": "RS-04",
+      "owner": "Ebraheem (Order)",
+      "category": "Integration",
+      "scenario": "Evaluation Service unreachable while a USD order is created",
+      "expected": "201, order saved with conversionStatus PENDING and PENDING_APPROVAL",
+      "actual": "201",
+      "pass": true,
+      "evidence": "HTTP 201 {\"order\":{\"id\":\"f5ec592b-f8da-46b0-a399-cdba25549d27\",\"orderNumber\":\"PO-1030\",\"supplierId\":\"b327287e-75c1-4e41-b2e4-5d4ab6cf6e5c\",\"supplierName\":\"Delta Packaging Co.\",\"category\":\"Packaging\",\"contractId\":\"228791c4-fa3d-4d78-b653-6064f5da47ab\",\"createdBy\":\"c4ec2"
+    },
+    {
+      "id": "RS-05",
+      "owner": "Ebraheem (Order)",
+      "category": "Integration",
+      "scenario": "Retry the conversion once the Evaluation Service is back",
+      "expected": "200, conversionStatus CONVERTED, amountEgp set",
+      "actual": "200",
+      "pass": true,
+      "evidence": "HTTP 200 {\"order\":{\"id\":\"f5ec592b-f8da-46b0-a399-cdba25549d27\",\"orderNumber\":\"PO-1030\",\"supplierId\":\"b327287e-75c1-4e41-b2e4-5d4ab6cf6e5c\",\"supplierName\":\"Delta Packaging Co.\",\"category\":\"Packaging\",\"contractId\":\"228791c4-fa3d-4d78-b653-6064f5da47ab\",\"createdBy\":\"c4ec2"
+    },
+    {
+      "id": "RS-06",
+      "owner": "Shared",
+      "category": "Monitoring",
+      "scenario": "External API failures are recorded as security/ops events",
+      "expected": "EXTERNAL_API_FAILURE events visible to the Admin activity API",
+      "actual": "6 EXTERNAL_API_FAILURE event(s) today",
+      "pass": true,
+      "evidence": "[{\"event_type\":\"AUTH_LOGIN_FAILED\",\"count\":15,\"last_seen\":\"2026-11-22T00:59:27.268Z\"},{\"event_type\":\"ACCESS_DENIED_ROLE\",\"count\":11,\"last_seen\":\"2026-11-22T00:59:26.664Z\"},{\"event_type\":\"ACCESS_DENIED_OWNERSHIP\",\"count\":10,\"last_seen\":\"2026-11-22T00:59:26.731Z"
+    }
+  ]
+}

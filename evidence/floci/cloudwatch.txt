@@ -1,0 +1,44 @@
+Captured 2026-11-22T00:55:52Z from Floci (account 000000000000). Values are counts only; no passwords or tokens are logged.
+
+== 1. Log query: failed logins in /aws/lambda/ses-auth-service  filter { $.event = "AUTH_LOGIN_FAILED" }
+{"ts":"2026-11-22T00:53:37.400Z","level":"warn","service":"auth-service","event":"AUTH_LOGIN_FAILED","reqId":"548b31b7-505d-43e6-8795-0fe174845e01","method":"POST","path":"/api/auth/login","userId":null,"status":401,"ip":"127.0.0.1","detail":{"reason":"unknown_email"}}
+{"ts":"2026-11-22T00:53:37.539Z","level":"warn","service":"auth-service","event":"AUTH_LOGIN_FAILED","reqId":"f129813a-fa30-4d06-9eb3-56adcbc62164","method":"POST","path":"/api/auth/login","userId":null,"status":401,"ip":"127.0.0.1","detail":{"reason":"unknown_email"}}
+{"ts":"2026-11-22T00:53:37.673Z","level":"warn","service":"auth-service","event":"AUTH_LOGIN_FAILED","reqId":"3f3f3096-8978-4877-a5a9-6058b01b872b","method":"POST","path":"/api/auth/login","userId":null,"status":401,"ip":"127.0.0.1","detail":{"reason":"unknown_email"}}
+{"ts":"2026-11-22T00:53:37.918Z","level":"warn","service":"auth-service","event":"AUTH_LOGIN_FAILED","reqId":"70ccd4aa-8714-4e52-b862-0192df8371fc","method":"POST","path":"/api/auth/login","userId":null,"status":401,"ip":"127.0.0.1","detail":{"reason":"unknown_email"}}
+{"ts":"2026-11-22T00:53:38.120Z","level":"warn","service":"auth-service","event":"AUTH_LOGIN_FAILED","reqId":"c0831b1b-71d2-4e4b-a71a-9828cc2c643e","method":"POST","path":"/api/auth/login","userId":null,"status":401,"ip":"127.0.0.1","detail":{"reason":"unknown_email"}}
+{"ts":"2026-11-22T00:53:38.267Z","level":"warn","service":"auth-service","event":"AUTH_LOGIN_FAILED","reqId":"75224de9-912b-4b11-9a11-efa77214a6d8","method":"POST","path":"/api/auth/login","userId":null,"status":401,"ip":"127.0.0.1","detail":{"reason":"unknown_email"}}
+
+== 2. Log query: 403 responses in /aws/lambda/ses-order-service  filter { $.event = "http_request" && $.status = 403 }
+{"ts":"2026-11-22T00:50:23.643Z","level":"info","service":"order-service","event":"http_request","reqId":"ae272240-24f7-4d71-ad68-ed629a8da23c","method":"PATCH","path":"/api/orders/e8a6ba96-127e-4d2a-a5df-51cc8a34c905/approval","status":403,"ms":7,"userId":"1c1da2c8-3450-4d9b-88a8-cbde20bb37e3","role":"staff"}
+{"ts":"2026-11-22T00:50:36.086Z","level":"info","service":"order-service","event":"http_request","reqId":"4ce2ec39-b774-4065-8ebb-9504a040ef8d","method":"PATCH","path":"/api/orders/721892ba-5283-4d31-8e3f-43ce5e5f3024/approval","status":403,"ms":6,"userId":"3c1b8153-c1e7-4dd5-94e1-922c9048249d","role":"admin"}
+
+== 3. Metrics (Sum per 5 minutes) from the metric filters
+-- SES/Security FailedLogins
+2026-11-22T02:45:00+02:00	0.0
+2026-11-22T02:50:00+02:00	15.0
+-- SES/Security Http401
+2026-11-22T02:45:00+02:00	0.0
+2026-11-22T02:50:00+02:00	22.0
+-- SES/Security Http403
+2026-11-22T02:45:00+02:00	0.0
+2026-11-22T02:50:00+02:00	7.0
+-- SES/Operations Http5xx
+2026-11-22T02:45:00+02:00	0.0
+2026-11-22T02:50:00+02:00	0.0
+-- SES/Operations ExchangeApiFailures
+2026-11-22T02:45:00+02:00	0.0
+2026-11-22T02:50:00+02:00	0.0
+
+== 4. Alarms
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+|                                                                     DescribeAlarms                                                                     |
++----------------------------+--------+------------------------------------------------------------------------------------------------------------------+
+|  ses-server-errors         |  OK    |  Threshold evaluated with missing datapoints treated as not breaching: 0 datapoint(s) breaching the threshold.   |
+|  ses-repeated-failed-logins|  ALARM |  Threshold Crossed: 1 datapoint(s) breaching the threshold.                                                      |
+|  ses-many-403              |  OK    |  Threshold evaluated with missing datapoints treated as not breaching: 0 datapoint(s) breaching the threshold.   |
++----------------------------+--------+------------------------------------------------------------------------------------------------------------------+
+
+== 5. Alarm history: ses-repeated-failed-logins
+2026-11-22T02:55:05.124000+02:00	Alarm updated from OK to ALARM
+2026-11-22T02:44:05.116000+02:00	Alarm updated from INSUFFICIENT_DATA to OK
+2026-11-22T02:44:03.033000+02:00	Alarm "ses-repeated-failed-logins" created

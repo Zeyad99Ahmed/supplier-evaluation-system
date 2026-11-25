@@ -1,0 +1,12 @@
+# Resilience tests (external API and service outages)
+
+Run at 2026-11-22T00:59:30.782Z - **6/6 passed**
+
+| ID | Owner | Category | Scenario | Expected | Actual | Result | Evidence |
+|---|---|---|---|---|---|---|---|
+| RS-01 | Karim (Evaluation) | External API | ExchangeRate provider unreachable, recent cached rate exists | 200 with stale=true (cached rate used) | 200 | PASS | `HTTP 200 {"currency":"EUR","rateToEgp":59.07372401,"rateDate":"2026-11-20","stale":true,"provider":"exchangerate-api.com (open access)"}` |
+| RS-02 | Karim (Evaluation) | External API | Provider returns an invalid response (result=error) | response rejected, cached rate used (stale=true) | 200 | PASS | `HTTP 200 {"currency":"USD","rateToEgp":53.80393845,"rateDate":"2026-11-20","stale":true,"provider":"exchangerate-api.com (open access)"}` |
+| RS-03 | Karim (Evaluation) | External API | Provider down and cached rate older than 7 days | 502 RATE_UNAVAILABLE | 502 RATE_UNAVAILABLE | PASS | `HTTP 502 {"error":{"code":"RATE_UNAVAILABLE","message":"Exchange rates are unavailable right now. Please try again later."}}` |
+| RS-04 | Ebraheem (Order) | Integration | Evaluation Service unreachable while a USD order is created | 201, order saved with conversionStatus PENDING and PENDING_APPROVAL | 201 | PASS | `HTTP 201 {"order":{"id":"f5ec592b-f8da-46b0-a399-cdba25549d27","orderNumber":"PO-1030","supplierId":"b327287e-75c1-4e41-b2e4-5d4ab6cf6e5c","supplierName":"Delta Packaging Co.","category":"Packaging","contractId":"228791c4-fa3d-4d78-b653-6064f5da47ab","createdBy":"c4ec2` |
+| RS-05 | Ebraheem (Order) | Integration | Retry the conversion once the Evaluation Service is back | 200, conversionStatus CONVERTED, amountEgp set | 200 | PASS | `HTTP 200 {"order":{"id":"f5ec592b-f8da-46b0-a399-cdba25549d27","orderNumber":"PO-1030","supplierId":"b327287e-75c1-4e41-b2e4-5d4ab6cf6e5c","supplierName":"Delta Packaging Co.","category":"Packaging","contractId":"228791c4-fa3d-4d78-b653-6064f5da47ab","createdBy":"c4ec2` |
+| RS-06 | Shared | Monitoring | External API failures are recorded as security/ops events | EXTERNAL_API_FAILURE events visible to the Admin activity API | 6 EXTERNAL_API_FAILURE event(s) today | PASS | `[{"event_type":"AUTH_LOGIN_FAILED","count":15,"last_seen":"2026-11-22T00:59:27.268Z"},{"event_type":"ACCESS_DENIED_ROLE","count":11,"last_seen":"2026-11-22T00:59:26.664Z"},{"event_type":"ACCESS_DENIED_OWNERSHIP","count":10,"last_seen":"2026-11-22T00:59:26.731Z` |

@@ -1,0 +1,100 @@
+== Lambda functions
+---------------------------------------------------------------------------------------------------------------------------------------------
+|                                                               ListFunctions                                                               |
++------------------------+-------------+-------------------------------------+--------------------------------------------------------------+
+|  ses-auth-service      |  nodejs22.x |  auth-service/lambda.handler        |  arn:aws:iam::000000000000:role/ses-auth-service-role        |
+|  ses-evaluation-service|  nodejs22.x |  evaluation-service/lambda.handler  |  arn:aws:iam::000000000000:role/ses-evaluation-service-role  |
+|  ses-order-service     |  nodejs22.x |  order-service/lambda.handler       |  arn:aws:iam::000000000000:role/ses-order-service-role       |
+|  ses-supplier-service  |  nodejs22.x |  supplier-service/lambda.handler    |  arn:aws:iam::000000000000:role/ses-supplier-service-role    |
++------------------------+-------------+-------------------------------------+--------------------------------------------------------------+
+== API Gateway HTTP APIs
+------------------------------------------------------
+|                       GetApis                      |
++-----------------------------+--------------+-------+
+|  ses-supplier-service-api   |  4188c125c1  |  HTTP |
+|  ses-order-service-api      |  4b54e4b6c0  |  HTTP |
+|  ses-evaluation-service-api |  63981333ab  |  HTTP |
+|  ses-auth-service-api       |  e18434178d  |  HTTP |
++-----------------------------+--------------+-------+
+== Routes of ses-order-service-api
+---------------------------------------
+|              GetRoutes              |
++-------------------------------------+
+|  OPTIONS /api/orders/{id}/approval  |
+|  OPTIONS /api/orders/{id}/status    |
+|  GET /api/orders                    |
+|  OPTIONS /api/orders/{id}/convert   |
+|  GET /api/orders/{id}               |
+|  POST /api/orders                   |
+|  PATCH /api/orders/{id}/status      |
+|  GET /api/orders/summary            |
+|  PATCH /api/orders/{id}/approval    |
+|  OPTIONS /api/orders                |
+|  OPTIONS /api/orders/summary        |
+|  GET /api/health                    |
+|  OPTIONS /api/health                |
+|  POST /api/orders/{id}/convert      |
+|  OPTIONS /api/orders/{id}           |
++-------------------------------------+
+== Secrets (names only)
+----------------------------------------------------------------------
+|                             ListSecrets                            |
++-------------------------+------------------------------------------+
+|  ses/auth-service       |  Runtime secrets for auth-service        |
+|  ses/supplier-service   |  Runtime secrets for supplier-service    |
+|  ses/order-service      |  Runtime secrets for order-service       |
+|  ses/evaluation-service |  Runtime secrets for evaluation-service  |
++-------------------------+------------------------------------------+
+== IAM roles and inline policy of the order service
+---------------------------------
+|           ListRoles           |
++-------------------------------+
+|  ses-auth-service-role        |
+|  ses-evaluation-service-role  |
+|  ses-order-service-role       |
+|  ses-supplier-service-role    |
++-------------------------------+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "OwnLogsOnly",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": [
+                "arn:aws:logs:us-east-1:000000000000:log-group:/aws/lambda/ses-order-service:*"
+            ]
+        },
+        {
+            "Sid": "OwnSecretOnly",
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:GetSecretValue"
+            ],
+            "Resource": [
+                "arn:aws:secretsmanager:us-east-1:000000000000:secret:ses/order-service-*"
+            ]
+        },
+        {
+            "Sid": "CallOnlyNeededServices",
+            "Effect": "Allow",
+            "Action": [
+                "lambda:InvokeFunction"
+            ],
+            "Resource": [
+                "arn:aws:lambda:us-east-1:000000000000:function:ses-supplier-service",
+                "arn:aws:lambda:us-east-1:000000000000:function:ses-evaluation-service"
+            ]
+        }
+    ]
+}
+== S3 website bucket
+2026-11-22 02:44:12       2630 admin.html
+2026-11-22 02:44:14       7910 css/style.css
+2026-11-22 02:44:12       1896 dashboard.html
+2026-11-22 02:44:12       4381 evaluations.html
+2026-11-22 02:44:12       1562 index.html

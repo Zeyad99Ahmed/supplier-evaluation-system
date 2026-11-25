@@ -1,0 +1,12 @@
+PASS  AUTH_API /api/health answers runtime lambda
+PASS  SUPPLIER_API /api/health answers runtime lambda
+PASS  ORDER_API /api/health answers runtime lambda
+PASS  EVALUATION_API /api/health answers runtime lambda
+PASS  internal route not published (API Gateway 404)
+PASS  protected route without token -> 401
+PASS  CORS allows the website origin
+PASS  CORS refuses another origin
+PASS  website index.html is served
+PASS  website config.js points to API Gateway
+PASS  no .env in the bucket
+Result: 11 passed, 0 failed
