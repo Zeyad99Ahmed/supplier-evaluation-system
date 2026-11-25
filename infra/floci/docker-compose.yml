@@ -1,0 +1,36 @@
+# Floci (free local AWS emulator) + PostgreSQL for the Supplier Directory & Evaluation System.
+#   docker compose -f infra/floci/docker-compose.yml up -d
+# Floci: http://localhost:4566 (Floci Dash: http://localhost:4566/_floci/ui)
+# Lambda containers are attached to this Compose network (FLOCI_HOSTNAME is set), so they reach
+# Floci at http://floci:4566 (AWS_ENDPOINT_URL is injected) and Postgres at ses-postgres:5432.
+# To use Neon instead of the local Postgres, put the Neon URLs in infra/.env.floci (see .env.floci.example).
+services:
+  floci:
+    image: floci/floci:latest
+    container_name: floci
+    ports:
+      - "4566:4566"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - floci-data:/app/data
+    environment:
+      FLOCI_HOSTNAME: floci
+      FLOCI_STORAGE_MODE: hybrid               # keeps resources across restarts (flushed every 5 s)
+      FLOCI_STORAGE_PERSISTENT_PATH: /app/data
+      FLOCI_DEFAULT_REGION: us-east-1
+
+  ses-postgres:
+    image: postgres:16-alpine
+    container_name: ses-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: supplierdb
+      POSTGRES_USER: ses_owner
+      POSTGRES_PASSWORD: ${PG_OWNER_PASSWORD:?set PG_OWNER_PASSWORD (bash infra/deploy.sh exports it from infra/.env.floci)}
+    volumes:
+      - ses-pg-data:/var/lib/postgresql/data
+
+volumes:
+  floci-data:
+  ses-pg-data:
