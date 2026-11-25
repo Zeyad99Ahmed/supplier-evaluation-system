@@ -1,0 +1,44 @@
+# Public routes published on each service's API Gateway (HTTP API). Anything not listed (including every
+# /internal/* route) is answered 404 by API Gateway and never reaches the Lambda function.
+# format: <service> <METHOD> <path>
+auth-service GET /api/health
+auth-service POST /api/auth/login
+auth-service POST /api/auth/logout
+auth-service GET /api/auth/me
+auth-service GET /api/users
+auth-service POST /api/users
+auth-service PATCH /api/users/{id}/status
+auth-service GET /api/admin/activity
+supplier-service GET /api/health
+supplier-service GET /api/categories
+supplier-service POST /api/categories
+supplier-service GET /api/suppliers
+supplier-service POST /api/suppliers
+supplier-service GET /api/suppliers/recommendations
+supplier-service GET /api/suppliers/{id}
+supplier-service PUT /api/suppliers/{id}
+supplier-service DELETE /api/suppliers/{id}
+supplier-service PATCH /api/suppliers/{id}/status
+supplier-service POST /api/suppliers/{id}/contacts
+supplier-service DELETE /api/suppliers/{id}/contacts/{contactId}
+supplier-service POST /api/suppliers/{id}/contracts
+supplier-service PATCH /api/contracts/{contractId}
+order-service GET /api/health
+order-service GET /api/orders
+order-service POST /api/orders
+order-service GET /api/orders/summary
+order-service GET /api/orders/{id}
+order-service PATCH /api/orders/{id}/status
+order-service PATCH /api/orders/{id}/approval
+order-service POST /api/orders/{id}/convert
+evaluation-service GET /api/health
+evaluation-service GET /api/evaluations
+evaluation-service POST /api/evaluations
+evaluation-service GET /api/evaluations/orders/{orderId}
+evaluation-service PUT /api/evaluations/{id}
+evaluation-service DELETE /api/evaluations/{id}
+evaluation-service GET /api/performance/compare
+evaluation-service GET /api/performance/suppliers/{id}
+evaluation-service POST /api/performance/suppliers/{id}/sync
+evaluation-service GET /api/rates/convert
+evaluation-service GET /api/rates/{currency}

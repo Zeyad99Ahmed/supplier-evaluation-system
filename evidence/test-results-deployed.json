@@ -1,0 +1,547 @@
+{
+  "runAt": "2026-11-22T00:57:39.038Z",
+  "passed": 54,
+  "failed": 0,
+  "results": [
+    {
+      "id": "AU-01",
+      "owner": "Shared (Auth/Security)",
+      "category": "Functional",
+      "scenario": "Admin logs in with valid credentials",
+      "expected": "200 + token, no password hash in response",
+      "actual": "200",
+      "pass": true,
+      "evidence": "HTTP 200 {\"token\":\"[REDACTED]\",\"expiresAt\":\"2026-11-22T02:57:35.215Z\",\"user\":{\"id\":\"b9b07821-b179-4e4d-8889-c87d3c22012c\",\"email\":\"admin@ses.local\",\"fullName\":\"Procurement Admin\",\"role\":\"admin\",\"isActive\":true,\"createdAt\":\"2026-11-22T00:56:34.138Z\",\"lastLoginAt\":\"2026-"
+    },
+    {
+      "id": "AU-02",
+      "owner": "Shared (Auth/Security)",
+      "category": "Invalid input",
+      "scenario": "Login with wrong password vs unknown e-mail",
+      "expected": "both 401 with the same message",
+      "actual": "401 / 401, same message: true",
+      "pass": true,
+      "evidence": "{\"error\":{\"code\":\"INVALID_CREDENTIALS\",\"message\":\"E-mail or password is incorrect.\"}}"
+    },
+    {
+      "id": "AU-03",
+      "owner": "Shared (Auth/Security)",
+      "category": "Invalid input",
+      "scenario": "Admin creates Staff with a weak password",
+      "expected": "400 VALIDATION_ERROR",
+      "actual": "400 VALIDATION_ERROR",
+      "pass": true,
+      "evidence": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"Some fields are invalid.\",\"details\":[{\"field\":\"password\",\"message\":\"password must be 10-72 characters.\"}]}}"
+    },
+    {
+      "id": "AU-04",
+      "owner": "Shared (Auth/Security)",
+      "category": "Invalid input",
+      "scenario": "Admin creates a Staff account with an e-mail that exists",
+      "expected": "409 EMAIL_TAKEN",
+      "actual": "409 EMAIL_TAKEN",
+      "pass": true,
+      "evidence": "HTTP 409 {\"error\":{\"code\":\"EMAIL_TAKEN\",\"message\":\"An account with this e-mail already exists.\"}}"
+    },
+    {
+      "id": "SU-01",
+      "owner": "Zeyad (Supplier)",
+      "category": "Functional",
+      "scenario": "Admin creates a supplier profile with a first contact",
+      "expected": "201, status ACTIVE",
+      "actual": "201",
+      "pass": true,
+      "evidence": "HTTP 201 {\"supplier\":{\"id\":\"14a02486-415b-469b-9df4-29c947d54188\",\"name\":\"Test Supplier 9f6ded\",\"categoryId\":1,\"category\":\"Electronics\",\"email\":\"s-9f6ded@example.com\",\"phone\":\"+20 2 1111 2222\",\"address\":null,\"country\":null,\"status\":\"ACTIVE\",\"statusReason\":null,\"perform"
+    },
+    {
+      "id": "SU-02",
+      "owner": "Zeyad (Supplier)",
+      "category": "Invalid input",
+      "scenario": "Create supplier with missing name, bad e-mail and unknown category",
+      "expected": "400 with 3 field errors",
+      "actual": "400 VALIDATION_ERROR",
+      "pass": true,
+      "evidence": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"Some fields are invalid.\",\"details\":[{\"field\":\"name\",\"message\":\"name is required.\"},{\"field\":\"categoryId\",\"message\":\"categoryId must be a number.\"},{\"field\":\"email\",\"message\":\"email must be a valid e-mail address."
+    },
+    {
+      "id": "SU-03",
+      "owner": "Zeyad (Supplier)",
+      "category": "Business rule",
+      "scenario": "Create a second supplier with the same name (any case)",
+      "expected": "409 SUPPLIER_EXISTS",
+      "actual": "409 SUPPLIER_EXISTS",
+      "pass": true,
+      "evidence": "HTTP 409 {\"error\":{\"code\":\"SUPPLIER_EXISTS\",\"message\":\"A supplier with this name already exists.\"}}"
+    },
+    {
+      "id": "SU-04",
+      "owner": "Zeyad (Supplier)",
+      "category": "Functional",
+      "scenario": "Staff searches suppliers by category and text",
+      "expected": "200, the new supplier is found",
+      "actual": "200",
+      "pass": true,
+      "evidence": "HTTP 200 {\"suppliers\":[{\"id\":\"14a02486-415b-469b-9df4-29c947d54188\",\"name\":\"Test Supplier 9f6ded\",\"categoryId\":1,\"category\":\"Electronics\",\"email\":\"s-9f6ded@example.com\",\"phone\":\"+20 2 1111 2222\",\"address\":null,\"country\":null,\"status\":\"ACTIVE\",\"statusReason\":null,\"perfo"
+    },
+    {
+      "id": "SU-05",
+      "owner": "Zeyad (Supplier)",
+      "category": "Functional",
+      "scenario": "Admin updates supplier details (PUT)",
+      "expected": "200, new phone stored",
+      "actual": "200",
+      "pass": true,
+      "evidence": "HTTP 200 {\"supplier\":{\"id\":\"14a02486-415b-469b-9df4-29c947d54188\",\"name\":\"Test Supplier 9f6ded\",\"categoryId\":1,\"category\":\"Electronics\",\"email\":\"s-9f6ded@example.com\",\"phone\":\"+20 2 9999 0000\",\"address\":null,\"country\":\"Egypt\",\"status\":\"ACTIVE\",\"statusReason\":null,\"perf"
+    },
+    {
+      "id": "SU-06",
+      "owner": "Zeyad (Supplier)",
+      "category": "Integration",
+      "scenario": "Order for a supplier with NO contract (Order -> Supplier eligibility)",
+      "expected": "422 NO_ACTIVE_CONTRACT",
+      "actual": "422 NO_ACTIVE_CONTRACT",
+      "pass": true,
+      "evidence": "HTTP 422 {\"error\":{\"code\":\"NO_ACTIVE_CONTRACT\",\"message\":\"Supplier has no active contract on 2026-11-22.\"}}"
+    },
+    {
+      "id": "SU-07",
+      "owner": "Zeyad (Supplier)",
+      "category": "Integration",
+      "scenario": "Admin adds a USD contract; value converted to EGP by the Evaluation Service",
+      "expected": "201, valueEgp > value, rate stored",
+      "actual": "201",
+      "pass": true,
+      "evidence": "HTTP 201 {\"contract\":{\"id\":\"bbea2959-1ad6-4430-aa70-3af2e8435dd0\",\"supplierId\":\"14a02486-415b-469b-9df4-29c947d54188\",\"title\":\"Test framework\",\"startDate\":\"2026-10-23\",\"endDate\":\"2027-09-18\",\"value\":2000,\"currency\":\"USD\",\"valueEgp\":107607.88,\"rateToEgp\":53.80393845,\"ra"
+    },
+    {
+      "id": "SU-08",
+      "owner": "Zeyad (Supplier)",
+      "category": "Business rule",
+      "scenario": "Add an overlapping active contract",
+      "expected": "409 CONTRACT_OVERLAP",
+      "actual": "409 CONTRACT_OVERLAP",
+      "pass": true,
+      "evidence": "HTTP 409 {\"error\":{\"code\":\"CONTRACT_OVERLAP\",\"message\":\"The dates overlap the active contract \\\"Test framework\\\" (2026-10-23 to 2027-09-18).\"}}"
+    },
+    {
+      "id": "SU-09",
+      "owner": "Zeyad (Supplier)",
+      "category": "Invalid input",
+      "scenario": "Contract with end date before start date and unknown currency",
+      "expected": "400 VALIDATION_ERROR",
+      "actual": "400 VALIDATION_ERROR",
+      "pass": true,
+      "evidence": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"Some fields are invalid.\",\"details\":[{\"field\":\"currency\",\"message\":\"currency must be one of: EGP, USD, EUR, GBP, SAR, AED, CNY, JPY, CHF, CAD, TRY, KWD.\"}]}}"
+    },
+    {
+      "id": "SU-10",
+      "owner": "Zeyad (Supplier)",
+      "category": "Business rule",
+      "scenario": "Invalid status transition ACTIVE -> ACTIVE",
+      "expected": "409 INVALID_STATUS_TRANSITION",
+      "actual": "409 INVALID_STATUS_TRANSITION",
+      "pass": true,
+      "evidence": "HTTP 409 {\"error\":{\"code\":\"INVALID_STATUS_TRANSITION\",\"message\":\"A supplier cannot move from ACTIVE to ACTIVE.\",\"details\":{\"allowed\":[\"UNDER_REVIEW\",\"SUSPENDED\"]}}}"
+    },
+    {
+      "id": "SU-11",
+      "owner": "Zeyad (Supplier)",
+      "category": "Functional",
+      "scenario": "Recommendations for the category include the eligible supplier",
+      "expected": "200, supplier ranked",
+      "actual": "200",
+      "pass": true,
+      "evidence": "HTTP 200 {\"categoryId\":1,\"recommendations\":[{\"rank\":1,\"id\":\"718863f2-920e-4b82-919b-6febbe9cf2b7\",\"name\":\"Nile Electronics\",\"categoryId\":1,\"category\":\"Electronics\",\"email\":\"sales@nile-electronics.example\",\"phone\":\"+20 2 2345 6789\",\"address\":\"Smart Village, Giza\",\"count"
+    },
+    {
+      "id": "OR-01",
+      "owner": "Ebraheem (Order)",
+      "category": "Integration",
+      "scenario": "Staff A orders in USD (Order -> Supplier eligibility, Order -> Evaluation conversion)",
+      "expected": "201, APPROVED, amountEgp computed",
+      "actual": "201",
+      "pass": true,
+      "evidence": "HTTP 201 {\"order\":{\"id\":\"2c986b81-fdbd-4529-9cc5-b3ea50258c5d\",\"orderNumber\":\"PO-1013\",\"supplierId\":\"14a02486-415b-469b-9df4-29c947d54188\",\"supplierName\":\"Test Supplier 9f6ded\",\"category\":\"Electronics\",\"contractId\":\"bbea2959-1ad6-4430-aa70-3af2e8435dd0\",\"createdBy\":\"27"
+    },
+    {
+      "id": "OR-02",
+      "owner": "Ebraheem (Order)",
+      "category": "Business rule",
+      "scenario": "Order above the approval threshold",
+      "expected": "201, PENDING_APPROVAL",
+      "actual": "201",
+      "pass": true,
+      "evidence": "HTTP 201 {\"order\":{\"id\":\"792c7e2f-ee72-4a9b-8645-0fa7be26f2b2\",\"orderNumber\":\"PO-1014\",\"supplierId\":\"14a02486-415b-469b-9df4-29c947d54188\",\"supplierName\":\"Test Supplier 9f6ded\",\"category\":\"Electronics\",\"contractId\":\"bbea2959-1ad6-4430-aa70-3af2e8435dd0\",\"createdBy\":\"27"
+    },
+    {
+      "id": "OR-03",
+      "owner": "Ebraheem (Order)",
+      "category": "Business rule",
+      "scenario": "Order larger than the remaining contract value (10,000 EGP)",
+      "expected": "422 CONTRACT_LIMIT_EXCEEDED",
+      "actual": "422 CONTRACT_LIMIT_EXCEEDED",
+      "pass": true,
+      "evidence": "HTTP 422 {\"error\":{\"code\":\"CONTRACT_LIMIT_EXCEEDED\",\"message\":\"This order (12000.00 EGP) exceeds the remaining contract value (10000.00 EGP).\",\"details\":{\"contractId\":\"1c34d8db-2e66-43c6-a634-d1608863c5b0\",\"contractValueEgp\":10000,\"usedEgp\":0,\"remainingEgp\":10000}}}"
+    },
+    {
+      "id": "OR-04",
+      "owner": "Ebraheem (Order)",
+      "category": "Invalid input",
+      "scenario": "Order with quantity 0, expected date before order date, bad currency",
+      "expected": "400 VALIDATION_ERROR",
+      "actual": "400 VALIDATION_ERROR",
+      "pass": true,
+      "evidence": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"Some fields are invalid.\",\"details\":[{\"field\":\"description\",\"message\":\"description must be at least 3 characters.\"},{\"field\":\"quantity\",\"message\":\"quantity must be at least 1.\"},{\"field\":\"unitPrice\",\"message\":\"uni"
+    },
+    {
+      "id": "OR-05",
+      "owner": "Ebraheem (Order)",
+      "category": "Business rule",
+      "scenario": "Mark a PENDING_APPROVAL order as delivered",
+      "expected": "409 INVALID_STATUS_TRANSITION",
+      "actual": "409 INVALID_STATUS_TRANSITION",
+      "pass": true,
+      "evidence": "HTTP 409 {\"error\":{\"code\":\"INVALID_STATUS_TRANSITION\",\"message\":\"Only APPROVED orders can be delivered (this order is PENDING_APPROVAL).\"}}"
+    },
+    {
+      "id": "OR-06",
+      "owner": "Ebraheem (Order)",
+      "category": "Functional",
+      "scenario": "Admin approves a Staff order",
+      "expected": "200, APPROVED",
+      "actual": "200",
+      "pass": true,
+      "evidence": "HTTP 200 {\"order\":{\"id\":\"792c7e2f-ee72-4a9b-8645-0fa7be26f2b2\",\"orderNumber\":\"PO-1014\",\"supplierId\":\"14a02486-415b-469b-9df4-29c947d54188\",\"supplierName\":\"Test Supplier 9f6ded\",\"category\":\"Electronics\",\"contractId\":\"bbea2959-1ad6-4430-aa70-3af2e8435dd0\",\"createdBy\":\"27"
+    },
+    {
+      "id": "OR-07",
+      "owner": "Ebraheem (Order)",
+      "category": "Functional",
+      "scenario": "Staff marks order delivered 1 day late",
+      "expected": "200, DELIVERED, onTime=false, daysLate=1",
+      "actual": "200",
+      "pass": true,
+      "evidence": "HTTP 200 {\"order\":{\"id\":\"2c986b81-fdbd-4529-9cc5-b3ea50258c5d\",\"orderNumber\":\"PO-1013\",\"supplierId\":\"14a02486-415b-469b-9df4-29c947d54188\",\"supplierName\":\"Test Supplier 9f6ded\",\"category\":\"Electronics\",\"contractId\":\"bbea2959-1ad6-4430-aa70-3af2e8435dd0\",\"createdBy\":\"27"
+    },
+    {
+      "id": "OR-08",
+      "owner": "Ebraheem (Order)",
+      "category": "Business rule",
+      "scenario": "Cancel an order that is already delivered",
+      "expected": "409",
+      "actual": "409 INVALID_STATUS_TRANSITION",
+      "pass": true,
+      "evidence": "HTTP 409 {\"error\":{\"code\":\"INVALID_STATUS_TRANSITION\",\"message\":\"A DELIVERED order cannot be cancelled.\"}}"
+    },
+    {
+      "id": "OR-09",
+      "owner": "Ebraheem (Order)",
+      "category": "Functional",
+      "scenario": "Staff A lists orders filtered by supplier (only own orders returned)",
+      "expected": "200, 2 orders, all created by A",
+      "actual": "200",
+      "pass": true,
+      "evidence": "HTTP 200 {\"orders\":[{\"id\":\"792c7e2f-ee72-4a9b-8645-0fa7be26f2b2\",\"orderNumber\":\"PO-1014\",\"supplierId\":\"14a02486-415b-469b-9df4-29c947d54188\",\"supplierName\":\"Test Supplier 9f6ded\",\"category\":\"Electronics\",\"contractId\":\"bbea2959-1ad6-4430-aa70-3af2e8435dd0\",\"createdBy\":\""
+    },
+    {
+      "id": "OR-10",
+      "owner": "Ebraheem (Order)",
+      "category": "Functional",
+      "scenario": "Spending summary calculates totals per supplier",
+      "expected": "200, supplier spend = sum of its order EGP values",
+      "actual": "200",
+      "pass": true,
+      "evidence": "HTTP 200 {\"scope\":\"own\",\"totals\":{\"orders\":2,\"spendEgp\":96847.09,\"pendingApproval\":0,\"pendingConversion\":0,\"delivered\":1},\"bySupplier\":[{\"supplierId\":\"14a02486-415b-469b-9df4-29c947d54188\",\"supplierName\":\"Test Supplier 9f6ded\",\"orders\":2,\"spendEgp\":96847.09,\"delivered\""
+    },
+    {
+      "id": "EV-01",
+      "owner": "Karim (Evaluation)",
+      "category": "Integration",
+      "scenario": "Rate an order that is not delivered (Evaluation -> Order status check)",
+      "expected": "409 ORDER_NOT_DELIVERED",
+      "actual": "409 ORDER_NOT_DELIVERED",
+      "pass": true,
+      "evidence": "HTTP 409 {\"error\":{\"code\":\"ORDER_NOT_DELIVERED\",\"message\":\"Only delivered orders can be rated (this order is APPROVED).\"}}"
+    },
+    {
+      "id": "EV-02",
+      "owner": "Karim (Evaluation)",
+      "category": "Functional",
+      "scenario": "Staff A rates the delivered order (4,3,5)",
+      "expected": "201, overall 0.4*4+0.3*3+0.3*5 = 4.00, supplier score pushed",
+      "actual": "201",
+      "pass": true,
+      "evidence": "HTTP 201 {\"evaluation\":{\"id\":\"b62dc0af-745a-45e9-9609-0540d1c80aac\",\"orderId\":\"2c986b81-fdbd-4529-9cc5-b3ea50258c5d\",\"orderNumber\":\"PO-1013\",\"supplierId\":\"14a02486-415b-469b-9df4-29c947d54188\",\"supplierName\":\"Test Supplier 9f6ded\",\"ratedBy\":\"2716f48b-1b39-459b-a97c-225"
+    },
+    {
+      "id": "EV-03",
+      "owner": "Karim (Evaluation)",
+      "category": "Business rule",
+      "scenario": "Rate the same order a second time",
+      "expected": "409 ALREADY_RATED",
+      "actual": "409 ALREADY_RATED",
+      "pass": true,
+      "evidence": "HTTP 409 {\"error\":{\"code\":\"ALREADY_RATED\",\"message\":\"This order has already been rated.\"}}"
+    },
+    {
+      "id": "EV-04",
+      "owner": "Karim (Evaluation)",
+      "category": "Invalid input",
+      "scenario": "Rating with quality 9 and price \"abc\"",
+      "expected": "400 VALIDATION_ERROR",
+      "actual": "400 VALIDATION_ERROR",
+      "pass": true,
+      "evidence": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"Some fields are invalid.\",\"details\":[{\"field\":\"quality\",\"message\":\"quality must be at most 5.\"},{\"field\":\"price\",\"message\":\"price must be a number.\"}]}}"
+    },
+    {
+      "id": "EV-05",
+      "owner": "Karim (Evaluation)",
+      "category": "Functional",
+      "scenario": "Author edits their rating",
+      "expected": "200, overall recalculated (5,5,5 -> 5.00)",
+      "actual": "200",
+      "pass": true,
+      "evidence": "HTTP 200 {\"evaluation\":{\"id\":\"b62dc0af-745a-45e9-9609-0540d1c80aac\",\"orderId\":\"2c986b81-fdbd-4529-9cc5-b3ea50258c5d\",\"orderNumber\":\"PO-1013\",\"supplierId\":\"14a02486-415b-469b-9df4-29c947d54188\",\"supplierName\":\"Test Supplier 9f6ded\",\"ratedBy\":\"2716f48b-1b39-459b-a97c-225"
+    },
+    {
+      "id": "EV-06",
+      "owner": "Karim (Evaluation)",
+      "category": "Integration",
+      "scenario": "Supplier profile shows the score pushed by the Evaluation Service",
+      "expected": "avgScore 5, ratingCount 1, onTimeRate 0",
+      "actual": "{\"avgScore\":5,\"ratingCount\":1,\"onTimeRate\":0,\"updatedAt\":\"2026-11-22T00:57:36.470Z\"}",
+      "pass": true,
+      "evidence": "{\"avgScore\":5,\"ratingCount\":1,\"onTimeRate\":0,\"updatedAt\":\"2026-11-22T00:57:36.470Z\"}"
+    },
+    {
+      "id": "EV-07",
+      "owner": "Karim (Evaluation)",
+      "category": "Functional",
+      "scenario": "Performance report and comparison",
+      "expected": "200, report averages match, compare ranks 2 suppliers",
+      "actual": "200/200",
+      "pass": true,
+      "evidence": "[{\"rank\":1,\"supplierId\":\"14a02486-415b-469b-9df4-29c947d54188\",\"overall\":5},{\"rank\":2,\"supplierId\":\"0535dc73-507c-4f57-a5ce-a4d0b009790a\",\"overall\":null}]"
+    },
+    {
+      "id": "EV-08",
+      "owner": "Karim (Evaluation)",
+      "category": "External API",
+      "scenario": "GET /api/rates/USD from ExchangeRate API (cached)",
+      "expected": "200, rateToEgp > 0, rate date",
+      "actual": "200",
+      "pass": true,
+      "evidence": "HTTP 200 {\"currency\":\"USD\",\"rateToEgp\":53.80393845,\"rateDate\":\"2026-11-20\",\"stale\":false,\"provider\":\"exchangerate-api.com (open access)\"}"
+    },
+    {
+      "id": "EV-09",
+      "owner": "Karim (Evaluation)",
+      "category": "Invalid input",
+      "scenario": "Rate lookup for an unsupported currency",
+      "expected": "400 VALIDATION_ERROR",
+      "actual": "400 VALIDATION_ERROR",
+      "pass": true,
+      "evidence": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"Some fields are invalid.\",\"details\":[{\"field\":\"currency\",\"message\":\"currency must be one of: EGP, USD, EUR, GBP, SAR, AED, CNY, JPY, CHF, CAD, TRY, KWD.\"}]}}"
+    },
+    {
+      "id": "EV-10",
+      "owner": "Karim (Evaluation)",
+      "category": "Functional",
+      "scenario": "Author deletes their rating; supplier count drops back to 0",
+      "expected": "200, ratingCount 0",
+      "actual": "200",
+      "pass": true,
+      "evidence": "HTTP 200 {\"message\":\"Rating deleted.\",\"supplierPerformance\":{\"avgScore\":null,\"ratingCount\":0,\"onTimeRate\":null,\"synced\":true,\"supplierStatusChanged\":false,\"supplierStatus\":\"ACTIVE\"}}"
+    },
+    {
+      "id": "IN-01",
+      "owner": "All three",
+      "category": "Integration",
+      "scenario": "3 poor ratings put the supplier UNDER_REVIEW, then new orders are refused",
+      "expected": "statusChanged=true, then order 422 SUPPLIER_UNDER_REVIEW",
+      "actual": "statusChanged=true, order 422 SUPPLIER_UNDER_REVIEW",
+      "pass": true,
+      "evidence": "{\"error\":{\"code\":\"SUPPLIER_UNDER_REVIEW\",\"message\":\"Supplier is under review: Automatic: average score 1.60 is below 2.5 after 3 ratings.\"}}"
+    },
+    {
+      "id": "IN-02",
+      "owner": "Zeyad + Ebraheem",
+      "category": "Integration",
+      "scenario": "Archive a supplier with an open order (Supplier -> Order open-order check)",
+      "expected": "409 SUPPLIER_HAS_OPEN_ORDERS",
+      "actual": "409 SUPPLIER_HAS_OPEN_ORDERS",
+      "pass": true,
+      "evidence": "HTTP 409 {\"error\":{\"code\":\"SUPPLIER_HAS_OPEN_ORDERS\",\"message\":\"This supplier has 2 open order(s). Deliver or cancel them before archiving.\"}}"
+    },
+    {
+      "id": "IN-03",
+      "owner": "Zeyad",
+      "category": "Integration",
+      "scenario": "Archive a supplier with no open orders",
+      "expected": "200, status ARCHIVED, contracts terminated",
+      "actual": "200",
+      "pass": true,
+      "evidence": "HTTP 200 {\"message\":\"Supplier archived.\",\"supplierId\":\"b36a0afc-34e6-490d-a803-5854d024f200\"}"
+    },
+    {
+      "id": "SEC-01",
+      "owner": "Shared (Auth/Security)",
+      "category": "Unauthenticated access",
+      "scenario": "Unauthenticated requests to protected routes of all four services",
+      "expected": "401 from every service",
+      "actual": "401, 401, 401, 401",
+      "pass": true,
+      "evidence": "{\"error\":{\"code\":\"UNAUTHENTICATED\",\"message\":\"Authentication is required.\"}}"
+    },
+    {
+      "id": "SEC-02",
+      "owner": "Shared (Auth/Security)",
+      "category": "Unauthenticated access",
+      "scenario": "Forged JWT (signed with a wrong secret) and expired JWT",
+      "expected": "401 for both",
+      "actual": "401, 401",
+      "pass": true,
+      "evidence": "{\"error\":{\"code\":\"UNAUTHENTICATED\",\"message\":\"Your session is invalid or has expired. Please log in again.\"}}"
+    },
+    {
+      "id": "SEC-03",
+      "owner": "Shared (Auth/Security)",
+      "category": "Unauthorized role",
+      "scenario": "Staff tries Admin actions: create supplier, approve order, list users, view security log",
+      "expected": "403 for each",
+      "actual": "403, 403, 403, 403",
+      "pass": true,
+      "evidence": "{\"error\":{\"code\":\"FORBIDDEN\",\"message\":\"You do not have permission to perform this action.\"}}"
+    },
+    {
+      "id": "SEC-04",
+      "owner": "Shared (Auth/Security)",
+      "category": "Unauthorized role",
+      "scenario": "Admin tries to submit a rating (only Staff may rate)",
+      "expected": "403",
+      "actual": "403 FORBIDDEN",
+      "pass": true,
+      "evidence": "HTTP 403 {\"error\":{\"code\":\"FORBIDDEN\",\"message\":\"You do not have permission to perform this action.\"}}"
+    },
+    {
+      "id": "SEC-05",
+      "owner": "Shared (Auth/Security)",
+      "category": "Unauthorized role",
+      "scenario": "Privilege escalation: create a user with role \"admin\" in the body",
+      "expected": "400 (role cannot be set by the client)",
+      "actual": "400 VALIDATION_ERROR",
+      "pass": true,
+      "evidence": "HTTP 400 {\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"Some fields are invalid.\",\"details\":[{\"field\":\"role\",\"message\":\"role cannot be set by the client.\"}]}}"
+    },
+    {
+      "id": "SEC-06",
+      "owner": "Shared (Auth/Security)",
+      "category": "Ownership / access",
+      "scenario": "IDOR: Staff B reads / changes / cancels Staff A's order by id",
+      "expected": "404 for each (existence not revealed)",
+      "actual": "404, 404, 404",
+      "pass": true,
+      "evidence": "{\"error\":{\"code\":\"NOT_FOUND\",\"message\":\"Order not found.\"}}"
+    },
+    {
+      "id": "SEC-07",
+      "owner": "Shared (Auth/Security)",
+      "category": "Ownership / access",
+      "scenario": "IDOR: Staff A rates Staff B's delivered order, and edits B's rating",
+      "expected": "404 for both",
+      "actual": "404, 404",
+      "pass": true,
+      "evidence": "{\"error\":{\"code\":\"NOT_FOUND\",\"message\":\"Order not found.\"}}"
+    },
+    {
+      "id": "SEC-08",
+      "owner": "Shared (Auth/Security)",
+      "category": "Unauthorized role",
+      "scenario": "Segregation of duties: Admin approves an order they raised themselves",
+      "expected": "403 SELF_APPROVAL_NOT_ALLOWED",
+      "actual": "403 SELF_APPROVAL_NOT_ALLOWED",
+      "pass": true,
+      "evidence": "HTTP 403 {\"error\":{\"code\":\"SELF_APPROVAL_NOT_ALLOWED\",\"message\":\"You cannot approve or reject an order you created.\"}}"
+    },
+    {
+      "id": "SEC-09",
+      "owner": "Shared (Auth/Security)",
+      "category": "Invalid input",
+      "scenario": "Malformed input: invalid JSON, text/plain body, 200 KB body",
+      "expected": "400, 415, 413",
+      "actual": "400, 415, 413",
+      "pass": true,
+      "evidence": "{\"error\":{\"code\":\"UNSUPPORTED_MEDIA_TYPE\",\"message\":\"Content-Type must be application/json.\"}}"
+    },
+    {
+      "id": "SEC-10",
+      "owner": "Shared (Auth/Security)",
+      "category": "Invalid input",
+      "scenario": "SQL injection in the supplier search and order filter",
+      "expected": "200 with no extra rows / 400, never 500",
+      "actual": "200 (total 0), 400",
+      "pass": true,
+      "evidence": "{\"suppliers\":[],\"page\":1,\"limit\":20,\"total\":0}"
+    },
+    {
+      "id": "SEC-11",
+      "owner": "Shared (Auth/Security)",
+      "category": "Invalid input",
+      "scenario": "Stored XSS payload in a supplier name is stored as plain text (UI uses textContent + CSP)",
+      "expected": "201, value returned unchanged, never executed",
+      "actual": "201",
+      "pass": true,
+      "evidence": "HTTP 201 {\"supplier\":{\"id\":\"09ddbde9-b5af-4485-bc10-37a7323ff569\",\"name\":\"<img src=x onerror=alert(1)> 9f6ded\",\"categoryId\":6,\"category\":\"IT Services\",\"email\":\"xss-9f6ded@example.com\",\"phone\":null,\"address\":null,\"country\":null,\"status\":\"ACTIVE\",\"statusReason\":null,\"per"
+    },
+    {
+      "id": "SEC-12",
+      "owner": "Shared (Auth/Security)",
+      "category": "Identity",
+      "scenario": "Brute force: 5 wrong passwords lock the account; correct password then refused",
+      "expected": "401 x5, then 429 ACCOUNT_LOCKED",
+      "actual": "401,401,401,401,401 then 429",
+      "pass": true,
+      "evidence": "{\"error\":{\"code\":\"ACCOUNT_LOCKED\",\"message\":\"Too many failed attempts. Try again after 15 minutes.\"}}"
+    },
+    {
+      "id": "SEC-13",
+      "owner": "Shared (Auth/Security)",
+      "category": "Identity",
+      "scenario": "Logout revokes the session; disabled account cannot log in",
+      "expected": "/me 401 after logout; login 401 when disabled",
+      "actual": "me 401, login 401",
+      "pass": true,
+      "evidence": "{\"error\":{\"code\":\"UNAUTHENTICATED\",\"message\":\"Your session has ended. Please log in again.\"}}"
+    },
+    {
+      "id": "SEC-15",
+      "owner": "Shared (Auth/Security)",
+      "category": "Cloud / service config",
+      "scenario": "Database least privilege: order_svc reads the supplier schema and deletes an order",
+      "expected": "permission denied for both",
+      "actual": "42501, 42501, 42501, 42501 (42501 = insufficient_privilege)",
+      "pass": true,
+      "evidence": "42501, 42501, 42501, 42501"
+    },
+    {
+      "id": "SEC-16",
+      "owner": "Shared (Auth/Security)",
+      "category": "Cloud / service config",
+      "scenario": "CORS: browser pre-flight from an unknown origin vs the website origin",
+      "expected": "no Allow-Origin for evil.example; allowed for the site",
+      "actual": "evil: none, site: http://localhost:4566",
+      "pass": true,
+      "evidence": "evil 200 ACAO=none; site 204 ACAO=http://localhost:4566"
+    },
+    {
+      "id": "SEC-17",
+      "owner": "Shared (Auth/Security)",
+      "category": "Cloud / service config",
+      "scenario": "Security headers on API responses",
+      "expected": "nosniff, HSTS, frame protection, no X-Powered-By",
+      "actual": "nosniff=nosniff, hsts=true, xfo=SAMEORIGIN, powered-by=none",
+      "pass": true,
+      "evidence": "content-security-policy: default-src 'none';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'none';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+    }
+  ]
+}

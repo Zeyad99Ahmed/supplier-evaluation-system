@@ -1,0 +1,38 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "OwnLogsOnly",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": [
+        "arn:aws:logs:${REGION}:${ACCOUNT}:log-group:/aws/lambda/ses-evaluation-service:*"
+      ]
+    },
+    {
+      "Sid": "OwnSecretOnly",
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:GetSecretValue"
+      ],
+      "Resource": [
+        "arn:aws:secretsmanager:${REGION}:${ACCOUNT}:secret:ses/evaluation-service-*"
+      ]
+    },
+    {
+      "Sid": "CallOnlyNeededServices",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:InvokeFunction"
+      ],
+      "Resource": [
+        "arn:aws:lambda:${REGION}:${ACCOUNT}:function:ses-order-service",
+        "arn:aws:lambda:${REGION}:${ACCOUNT}:function:ses-supplier-service"
+      ]
+    }
+  ]
+}
